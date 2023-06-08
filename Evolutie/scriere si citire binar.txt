@@ -1,0 +1,250 @@
+		#include <stdio.h>
+		#include <winbgim.h>
+        #include <stdlib.h>
+
+			struct threeNum
+			{
+				int n1, n2, n3, n4;
+			};
+			int main()
+			{
+				int n;
+				struct threeNum num;
+				FILE *fptr;
+                if ((fptr = fopen("prbinar.bin","r")) == NULL)
+					printf("Error! opening file");
+ /*
+                fptr = fopen("prbinar.bin","w");
+
+				num.n1 = 1100; num.n2=900; num.n3=1100; num.n4=970;  //startul
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//1
+				num.n1 = 400; num.n2=970; num.n3=1600; num.n4=970;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//2
+				num.n1 = 450; num.n2=900; num.n3=800; num.n4=900;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//3
+                num.n1 = 900; num.n2=900; num.n3=1300; num.n4=900;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//4
+				num.n1 = 1400; num.n2=900; num.n3=1550; num.n4=900;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//5
+				num.n1 = 1550; num.n2=900; num.n3=1610; num.n4=870;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//6
+				num.n1 = 1600; num.n2=970; num.n3=1670; num.n4=920;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//7
+				num.n1 = 1610; num.n2=870; num.n3=1630; num.n4=840;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//8
+				num.n1 = 1670; num.n2=920; num.n3=1720; num.n4=840;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//9
+				num.n1 = 1630; num.n2=840; num.n3=1630; num.n4=500;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+                //10
+                num.n1 = 1720; num.n2=840; num.n3=1720; num.n4=500;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//11
+				num.n1 = 1400; num.n2=900; num.n3=1350; num.n4=850;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//12
+				num.n1 = 1300; num.n2=900; num.n3=1240; num.n4=840;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//13
+				num.n1 = 1350; num.n2=850; num.n3=1300; num.n4=750;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//14
+				num.n1 = 1240; num.n2=840; num.n3=1200; num.n4=740;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//15
+				num.n1 = 1300; num.n2=750; num.n3=1300; num.n4=600;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//16
+				num.n1 = 1300; num.n2=600; num.n3=1350; num.n4=500;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//17
+				num.n1 = 1350; num.n2=500; num.n3=1400; num.n4=480;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//18
+				num.n1 = 1400; num.n2=480; num.n3=1600; num.n4=480;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//19
+				num.n1 = 1630; num.n2=500; num.n3=1600; num.n4=480;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//20
+				num.n1 = 1720; num.n2=500; num.n3=1680; num.n4=430;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+                //21
+                num.n1 = 1680; num.n2=430; num.n3=1640; num.n4=410;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//22
+				num.n1 = 1640; num.n2=410; num.n3=1300; num.n4=410;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//23
+				num.n1 = 800; num.n2=900; num.n3=850; num.n4=850;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//24
+				num.n1 = 900; num.n2=900; num.n3=950; num.n4=840;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//25
+				num.n1 = 850; num.n2=850; num.n3=890; num.n4=720;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//26
+				num.n1 = 950; num.n2=840; num.n3=970; num.n4=730;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//27
+				num.n1 = 970; num.n2=730; num.n3=1000; num.n4=680;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//28
+				num.n1 = 1200; num.n2=740; num.n3=1150; num.n4=680;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//29
+				num.n1 = 1000; num.n2=680; num.n3=1150; num.n4=680;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//30
+				num.n1 = 890; num.n2=720; num.n3=915; num.n4=680;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//31
+				num.n1 = 915; num.n2=680; num.n3=915; num.n4=600;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//32
+				num.n1 = 915; num.n2=600; num.n3=880; num.n4=540;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//33
+				num.n1 = 1000; num.n2=620; num.n3=1215; num.n4=620;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//34
+				num.n1 = 1215; num.n2=620; num.n3=1230; num.n4=580;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//35
+				num.n1 = 1230; num.n2=580; num.n3=1220; num.n4=480;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//36
+				num.n1 = 1220; num.n2=480; num.n3=950; num.n4=480;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//37
+				num.n1 = 950; num.n2=480; num.n3=1000; num.n4=550;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//38
+				num.n1 = 1000; num.n2=550; num.n3=1000; num.n4=620;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//39
+				num.n1 = 1220; num.n2=410; num.n3=950; num.n4=410;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//40
+				num.n1 = 1220; num.n2=410; num.n3=1190; num.n4=300;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//41
+				num.n1 = 1300; num.n2=410; num.n3=1270; num.n4=270;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//42
+				num.n1 = 1190; num.n2=300; num.n3=1150; num.n4=270;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//43
+				num.n1 = 1270; num.n2=270; num.n3=1190; num.n4=190;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//44
+				num.n1 = 1190; num.n2=190; num.n3=900; num.n4=190;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//45
+				num.n1 = 1150; num.n2=270; num.n3=950; num.n4=270;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//46
+				num.n1 = 900; num.n2=190; num.n3=830; num.n4=240;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//47
+				num.n1 = 950; num.n2=270; num.n3=900; num.n4=300;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//48
+				num.n1 = 900; num.n2=300; num.n3=900; num.n4=350;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//49
+				num.n1 = 900; num.n2=350; num.n3=950; num.n4=410;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//50
+				num.n1 = 830; num.n2=240; num.n3=830; num.n4=400;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//51
+				num.n1 = 880; num.n2=540; num.n3=880; num.n4=480;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//52
+				num.n1 = 880; num.n2=480; num.n3=700; num.n4=480;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//53
+				num.n1 = 830; num.n2=400; num.n3=800; num.n4=420;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//54
+				num.n1 = 800; num.n2=420; num.n3=700; num.n4=420;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+				//55
+				num.n1 = 450; num.n2=900; num.n3=370; num.n4=860;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+                //56
+                num.n1 = 400; num.n2=970; num.n3=280; num.n4=910;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+                //57
+                num.n1 = 370; num.n2=860; num.n3=280; num.n4=760;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+                //58
+                num.n1 = 280; num.n2=910; num.n3=150; num.n4=750;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+                //59
+                num.n1 = 280; num.n2=760; num.n3=280; num.n4=600;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+
+                //60
+                num.n1 = 150; num.n2=750; num.n3=150; num.n4=600;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+                //61
+                num.n1 = 280; num.n2=600; num.n3=350; num.n4=480;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+                //62
+                num.n1 = 150; num.n2=600; num.n3=250; num.n4=420;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+                //63
+                num.n1 = 350; num.n2=480; num.n3=700; num.n4=480;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+				//64
+                num.n1 = 250; num.n2=420; num.n3=800; num.n4=420;
+				fwrite(&num, sizeof(struct threeNum), 1, fptr);
+   */
+				 initwindow(1920, 1080);
+			for(n = 1; n <=65; ++n)
+		{
+              fread(&num, sizeof(struct threeNum), 1, fptr);
+			  printf("n1: %d\tn2: %d\tn3: %d\tn4: %d", num.n1, num.n2, num.n3, num.n4);
+		     line(num.n1,num.n2,num.n3,num.n4);
+
+		}
+            getch();
+			fclose(fptr);
+			return 0;
+			}

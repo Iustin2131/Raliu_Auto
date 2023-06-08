@@ -1,0 +1,1244 @@
+#include <iostream>
+#include <graphics.h>
+#include <conio.h>
+#include <cmath>
+#include <ctime>
+#include <MMsystem.h>
+#include <winbgim.h>
+using namespace std;
+int width=GetSystemMetrics(SM_CXSCREEN);
+int height=GetSystemMetrics(SM_CYSCREEN);
+int mx,my,ok=1,stopmen1,stopmen3,stopsunet;
+bool meniulprincipal=true,meniulsecundar=false,meniulhowtoplay=false;
+char arr[100];
+int nanosec=0,milisec=0,sec=0,minute=0,h=0;
+bool gameOver=false;
+int x=100,y=100,antx,anty,viteza,score,car1=1,v[10000]= {0},ord[10]= {-1};
+enum edirectie {Stop=0,stanga,dreapta,sus,jos,stangasus,stangajos,dreaptajos,dreaptasus};
+edirectie dir;
+int a[1000][1000]= {0},pozitiemausx,pozitiemausy,gameOvergreseala,gameovercomplet;
+int Ay=height*200/864,Ax=width*396/1536,Gx=Ax,Gy=height*650/864,R=width*75/1536;
+int Bx=width*1025/1536,By=Ay-R,Cx=Bx+R,Cy=Ay,Dx=Cx,Dy=Gy,r=R/2,ax,ay;
+bool input = false;
+bool meniu2,meniu3=0,stoplevels=0,stopranking=0,stopbody=0,stopmentesla=0,stopmenlamburghini=0,stopmencar=1,Level1=0;
+char tasta, LastNumePLayer[100];
+int  ScoreLastNumePlayer;
+void ConturPista()
+{
+    setcolor(WHITE);
+
+    arc(Ax+2+R, Ay, 90, 180,R);
+    arc(Ax+2+R, Ay-2,90,180,R-1);
+    line(Ax+1,Ay,Ax+1,Gy);
+    line(Ax+2,Ay,Ax+2,Gy);
+    line(Ax+2+R,By,Bx,By);
+    line(Ax+2+R,By+1,Bx,By+1);
+    arc(Bx+1,By+R,0,90,R);
+    arc(Bx+1,By+R,0,90,R+1);
+    line(Cx,Cy,Dx,Dy);
+    line(Cx+1,Cy,Dx+1,Dy);
+    arc(Dx-R,Dy,270,0,R);
+    arc(Dx-R,Dy,270,0,R+1);
+    arc(Gx+R,Gy,180,270,R);
+    arc(Gx+R,Gy,180,270,R-1);
+    line(Gx+R,Gy+R,Dx-R,Dy+R);
+    line(Gx+R,Gy+R,Dx-R,Dy+R-1);
+
+    line(Ax+1+R,Ay+r/2,Ax+1+R,Gy-r);
+    line(Ax+1+R,Ay+r/2,Ax+1+R,Gy+1-r);
+    arc(Ax+1+R+r,Ay+r/2,90,180,r);
+    arc(Ax+1+R+r,Ay+r/2,90,180,r-1);
+    line(Ax+1+R+r,Ay-r/2,Bx-r,Ay-r/2);
+    line(Ax+1+R+r,Ay-r/2,Bx-r,Ay-r/2-1);
+    arc(Bx-r,Ay+r/2,0,90,r);
+    arc(Bx-r,Ay+r/2,0,90,r-1);
+    line(Bx,Ay+r/2,Dx-R,Dy-r);
+    line(Bx-1,Ay+r/2,Dx-R-1,Dy-r);
+    line(Dx-R-r,Dy,Ax+1+R+r,Gy);
+    line(Dx-R-r,Dy-1,Ax+1+R+r,Gy-1);
+    arc(Dx-R-r,Dy-r,270,0,r);
+    arc(Dx-R-r,Dy-r,270,0,r-1);
+    arc(Ax+1+R+r,Gy-r,180,270,r);
+    arc(Ax+1+R+r,Gy-r,180,270,r-1);
+
+}
+void SetUp()
+{
+    gameOver=false;
+    dir=Stop;
+    readimagefile("Back.jpg",30,height-110,80,height-50);
+    ConturPista();
+    setfillstyle(SOLID_FILL,BLUE);
+    floodfill(0,0,WHITE);  //  coloring the exterior of the rally
+    setfillstyle(SOLID_FILL,BLUE);
+    floodfill(width/2,height/2,WHITE); // coloring the interior of the rally
+    setfillstyle(HATCH_FILL,GREEN);
+    floodfill(Ax+10,Ay,WHITE); //coloring the interior of the track with squares
+    setcolor(BLACK);
+    x=(Dx+Gx)/2-15;
+    y=(Dy+Gy)/2+10;
+    antx=x;
+    anty=y;
+    score=0;
+}
+void Startul()
+{
+    setcolor(4);
+    line((Dx-R-r+Ax+1+R+r)/2-3,(Dy+Gy)/2+R,(Dx-R-r+Ax+1+R+r)/2-3,(Dy+Gy)/2);
+    line((Dx-R-r+Ax+1+R+r)/2-4,(Dy+Gy)/2+R,(Dx-R-r+Ax+1+R+r)/2-4,(Dy+Gy)/2);
+}
+struct nod
+{
+    int x1,y1,x2,y2,nr;
+    nod *urm;
+};
+int fr=0,numar=0;
+nod *p=NULL,*u=NULL,*q;
+void Drum(int x1,int y1,int x2,int y2)
+{
+    if(p==NULL)
+    {
+        p=new nod;
+        p->x1=x1;
+        p->y1=y1;
+        p->x2=x2;
+        p->y2=y2;
+        p->nr=++numar;
+        u=p;
+        u->urm=NULL;
+    }
+    else
+    {
+        q=new nod;
+        q->x1=x1;
+        q->y1=y1;
+        q->x2=x2;
+        q->y2=y2;
+        q->nr=++numar;
+        u->urm=q;
+        u=q;
+        u->urm=NULL;
+    }
+}
+void ConstruireDrumAnterior()
+{
+    setcolor(RED);
+    q=p;
+    int cx,cy,bx,by,ax,ay,dx,dy,ex,ey;
+    while(q!=NULL)
+    {
+        line(q->x1,q->y1,q->x2,q->y2);   //Dreapta(Drumul pe unde a trecut masina)
+
+        if(v[q->nr]==11) //Sagetile
+        {
+            cx=q->x1;
+            cy=q->y1,bx=q->x2,by=q->y2;
+            line((bx+cx)/2,(by+cy)/2,(bx+cx)/2,(cy+by)/2+10);
+            line((bx+cx)/2,(by+cy)/2,(bx+cx)/2-10,(cy+by)/2);
+            line((bx+cx)/2+1,(by+cy)/2+1,(bx+cx)/2+1,(cy+by)/2+11);
+            line((bx+cx)/2+1,(by+cy)/2+1,(bx+cx)/2-9,(cy+by)/2+1);
+        }
+        else if(v[q->nr]==22)
+        {
+            cx=q->x1;
+            cy=q->y1,ax=q->x2,ay=q->y2;
+            line((ax+cx)/2,(ay+cy)/2,(ax+cx)/2,(ay+cy)/2+10);
+            line((ax+cx)/2,(ay+cy)/2,(ax+cx)/2+10,(ay+cy)/2);
+            line((ax+cx)/2-1,(ay+cy)/2-1,(ax+cx)/2+1,(ay+cy)/2+9);
+            line((ax+cx)/2-1,(ay+cy)/2-1,(ax+cx)/2+9,(ay+cy)/2+1);
+        }
+        else if(v[q->nr]==32)
+        {
+            cx=q->x1;
+            cy=q->y1,dx=q->x2,dy=q->y2;
+            line((dx+cx)/2,(dy+cy)/2,(dx+cx)/2+10,(dy+cy)/2);
+            line((dx+cx)/2,(dy+cy)/2,(dx+cx)/2,(cy+dy)/2-10);
+        }
+        else if(v[q->nr]==42)
+        {
+            cx=q->x1;
+            cy=q->y1,ex=q->x2,ey=q->y2;
+            line((ex+cx)/2,(ey+cy)/2,(ex+cx)/2-10,(ey+cy)/2);
+            line((ex+cx)/2,(ey+cy)/2,(ex+cx)/2,(cy+ey)/2-10);
+        }
+        else if(v[q->nr]==12)
+        {
+            cx=q->x1;
+            cy=q->y1,ex=q->x2,ey=q->y2;
+            line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2-7,(cy+ey)/2+7);
+            line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2+7,(cy+ey)/2+7);
+        }
+        else if(v[q->nr]==33)
+        {
+            cx=q->x1;
+            cy=q->y1,ex=q->x2,ey=q->y2;
+            line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2-7,(cy+ey)/2-7);
+            line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2+7,(cy+ey)/2-7);
+        }
+        else if(v[q->nr]==31)
+        {
+            cx=q->x1;
+            cy=q->y1,ex=q->x2,ey=q->y2;
+            line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2+7,(cy+ey)/2-7);
+            line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2+7,(cy+ey)/2+7);
+        }
+        else if(v[q->nr]==10)
+        {
+            cx=q->x1;
+            cy=q->y1,ex=q->x2,ey=q->y2;
+            line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2-7,(cy+ey)/2-7);
+            line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2-7,(cy+ey)/2+7);
+        }
+        q=q->urm;
+    }
+    setcolor(WHITE);
+}
+
+void Draw()
+{
+    for(int i=10; i<=1800; i++)
+        for(int j=10; j<=1700; j++)
+            if(i==x && j==y)
+            {
+                if(getpixel(x,y)==BLUE)
+                {
+                    gameOver=true;
+                    gameovercomplet=0;
+                    gameOvergreseala=1;
+                    p=NULL;
+                    q=NULL;
+                }
+                if(score==30)
+                {
+                    gameOver=true;
+                    gameovercomplet=1;
+                    gameOvergreseala=0;
+                    p=NULL;
+                    q=NULL;
+                }
+                milisec++;
+                if(milisec==60)
+                {
+                    milisec=0;
+                    sec++;
+                }
+                if(sec==60)
+                {
+                    sec=0;
+                    minute++;
+                }
+                if(minute==60)
+                {
+                    minute=0;
+                    h++;
+                }
+                arr[0]='/0';
+                setcolor(WHITE);
+                settextstyle(TRIPLEX_FONT,HORIZ_DIR,6);
+                sprintf(arr,"%d:%d:%d",h,minute,sec);
+                outtextxy(width/2-110,10,arr);
+
+                if(car1==1)
+                    readimagefile("car1dirstanga.gif",x-10,y-10,x+10,y+10);
+                else if(car1==2)
+                    readimagefile("car1dirdreapta.gif",x-10,y-10,x+10,y+10);
+                else if(car1==0)
+                    readimagefile("car1dirinainte.gif",x-10,y-10,x+10,y+10);
+                else if(car1==3)
+                    readimagefile("car1dirinapoi.gif",x-10,y-10,x+10,y+10);
+                else if(car1==4)
+                    readimagefile("car1dirstangajos.gif",x-15,y-15,x+15,y+15);
+                else if(car1==5)
+                    readimagefile("car1dirstangasus.gif",x-35,y-35,x+35,y+35);
+                else if(car1==6)
+                    readimagefile("car1dirdreaptajos.gif",x-15,y-15,x+15,y+15);
+                else if(car1==7)
+                    readimagefile("car1dirdreaptasus.gif",x-15,y-15,x+15,y+15);
+            }
+
+    setcolor(0);
+    readimagefile("Back.gif",30,height-110,80,height-50);
+    ConstruireDrumAnterior();
+}
+void Input()
+{
+    tasta=getch();
+    if('a'==tasta)
+    {
+        v[++fr]=31;
+        Drum(x,y,x-40,y);
+        antx=x;
+        x-=40;
+        car1=1;
+        if(antx>=(Dx-R-r+Ax+1+R+r)/2-4 && x<=(Dx-R-r+Ax+1+R+r)/2-4 && y<=(Dy+Gy)/2+R  && y>=(Dy+Gy)/2)
+        {
+            score+=10;
+            arr[0]='/0';
+            setcolor(WHITE);
+            settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+            sprintf(arr,"Score:%d",score+ScoreLastNumePlayer);
+            outtextxy(width/2-105,70,arr);
+        }
+    }
+    else if('d'==tasta)
+    {
+        v[++fr]=10;
+        Drum(x,y,x+40,y);
+        antx=x;
+        x+=40;
+        car1=2;
+        if(antx<=(Dx-R-r+Ax+1+R+r)/2-4 && x>=(Dx-R-r+Ax+1+R+r)/2-4 && y<=(Dy+Gy)/2+R  && y>=(Dy+Gy)/2)
+        {
+            score+=10;
+            arr[0]='/0';
+            setcolor(WHITE);
+            settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+            sprintf(arr,"Score:%d",score+ScoreLastNumePlayer);
+            outtextxy(width/2-105,70,arr);
+        }
+    }
+    else if('w'==tasta)
+    {
+        v[++fr]=12;
+        Drum(x,y,x,y-40);
+        anty=y;
+        y-=40;
+        car1=0;
+        //Trebuie testat daca este corect pentru un start aflat orizontal
+        if(anty>=(Dx-R-r+Ax+1+R+r)/2-4 && x>=(Dx-R-r+Ax+1+R+r)/2-4 && y<=(Dy+Gy)/2+R  && y>=(Dy+Gy)/2)
+        {
+            score+=10;
+            arr[0]='/0';
+            setcolor(WHITE);
+            settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+            sprintf(arr,"Score:%d",score+ScoreLastNumePlayer);
+            outtextxy(width/2-105,70,arr);
+        }
+    }
+    else if('s'==tasta)
+    {
+        v[++fr]=33;
+        Drum(x,y,x,y+40);
+        y+=40;
+        car1=3;
+        /*   //Trebuie testat daca este corect pentru un start aflat orizontal
+         if(anty<=(Dx-R-r+Ax+1+R+r)/2-4 && x>=(Dx-R-r+Ax+1+R+r)/2-4 && y<=(Dy+Gy)/2+R  && y>=(Dy+Gy)/2)
+                  {
+                      score+=10;
+                      arr[0]='/0';  setcolor(WHITE);
+                      settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+                      sprintf(arr,"Score:%d",score);
+                      outtextxy(width/2-105,70,arr);
+                  }
+         */
+    }
+    else if('q'==tasta)
+    {
+        v[++fr]=22;
+        Drum(x,y,x-40,y-40);
+        antx=x;
+        anty=y;
+        x-=40;
+        y-=40;
+        car1=5;
+        if(x<=(Dx+Ax+1)/2-4 && antx>=(Dx+Ax+1)/2-4 && y>=(Dy+Gy)/2 && anty<=(Dy+Gy)/2+R)
+        {
+            score+=10;
+            arr[0]='/0';
+            setcolor(WHITE);
+            settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+            sprintf(arr,"Score:%d",score+ScoreLastNumePlayer);
+            outtextxy(width/2-105,70,arr);
+        }
+    }
+    else if('e'==tasta)
+    {
+        v[++fr]=11;
+        Drum(x,y,x+40,y-40);
+        antx=x;
+        anty=y;
+        x+=40;
+        y-=40;
+        car1=7;
+        if(x>=(Dx+Ax+1)/2-4 && antx<=(Dx+Ax+1)/2-4 && y>=(Dy+Gy)/2 && anty<=(Dy+Gy)/2+R)
+        {
+            score+=10;
+            arr[0]='/0';
+            setcolor(WHITE);
+            settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+            sprintf(arr,"Score:%d",score+ScoreLastNumePlayer);
+            outtextxy(width/2-105,70,arr);
+        }
+    }
+    else if('x'==tasta)
+    {
+        v[++fr]=42;
+        antx=x;
+        anty=y;
+        Drum(x,y,x+40,y+40);
+        x+=40;
+        y+=40;
+        car1=6;
+        if(x>=(Dx+Ax+1)/2-4 && antx<=(Dx+Ax+1)/2-4 && y>=(Dy+Gy)/2 && anty<=(Dy+Gy)/2+R)
+        {
+            score+=10;
+            arr[0]='/0';
+            setcolor(WHITE);
+            settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+            sprintf(arr,"Score:%d",score+ScoreLastNumePlayer);
+            outtextxy(width/2-105,70,arr);
+        }
+    }
+    else if('z'==tasta)
+    {
+        v[++fr]=32;
+        antx=x;
+        anty=y;
+        Drum(x,y,x-40,y+40);
+        x-=40;
+        y+=40;
+        car1=4;
+        if(x<=(Dx+Ax+1)/2-4 && antx>=(Dx+Ax+1)/2-4 && y<=(Dy+Gy)/2+R && anty<=(Dy+Gy)/2+R)
+        {
+            score+=10;
+            arr[0]='/0';
+            setcolor(WHITE);
+            settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+            sprintf(arr,"Score:%d",score+ScoreLastNumePlayer);
+            outtextxy(width/2-105,70,arr);
+        }
+    }
+    milisec++;
+    if(milisec==60)
+    {
+        milisec=0;
+        sec++;
+    }
+    if(sec==60)
+    {
+        sec=0;
+        minute++;
+    }
+    if(minute==60)
+    {
+        minute=0;
+        h++;
+    }
+}
+
+void MeniulHowToPlay()
+{
+    while(meniulhowtoplay)
+    {
+        readimagefile("howtoplay.jpg",0,0,width,height);
+        while(meniulhowtoplay)
+        {
+            getmouseclick(WM_LBUTTONDOWN, mx, my);
+            settextstyle(DEFAULT_FONT,HORIZ_DIR,2);
+            outtextxy(25,240,"Press any key to view the moving car");
+            readimagefile("Back.gif",30,height-110,80,height-50);
+            if(mx >= 30 && mx <= 80 && my >= height-110 && my <= height-50)   // Nu este corect
+            {
+                meniulprincipal=true;
+                meniulhowtoplay=false;
+                stopmen1=0;
+            }
+        }
+    }
+}
+void sunet()
+{
+    getmouseclick(WM_LBUTTONDOWN, mx, my);
+    pozitiemausx=mousex();
+    pozitiemausy=mousey();
+    if((mx >= width-80 && mx <=width-10 && my >= 10 && my <= 80) && stopsunet==0)
+    {
+        sndPlaySound("game start.wav",SND_ASYNC);
+        sndPlaySound("ROCK IT.wav",SND_ASYNC);
+        readimagefile("Sound on.gif",width-80,10,width-10,0);
+        stopsunet=1;
+    }
+    else if((mx >= width-80 && mx <=width-10 && my >= 10 && my <= 80) && stopsunet==1)
+    {
+        sndPlaySound("game start.wav",SND_ASYNC);
+        readimagefile("Sound off.gif",width-80,10,width-10,80);
+        PlaySound(0,0,0);
+        stopsunet=0;
+    }
+
+}
+void exit()
+{
+    if(pozitiemausx >= width/2-300 && pozitiemausx <= width/2-140 && pozitiemausy >= height/2+170 && pozitiemausy <= height/2+270)
+        readimagefile("Exit yellow.gif",width/2-300,height/2+170,width/2-140,height/2+277);
+    else
+        readimagefile("Exit.gif",width/2-298,height/2+170,width/2-140,height/2+275);
+    if(mx >=  width/2-300 && mx <= width/2-140 && my >=  height/2+170 && my <=  height/2+270)
+    {
+        sndPlaySound("game start.wav",SND_ASYNC);
+        closegraph();
+        PlaySound(0,0,0);
+    }
+
+}
+void DeseneazaMeniulPrincipal()
+{
+    if(!stopmen1)
+    {
+        readimagefile("Rocket League.jpg",0,0,width,height);
+        readimagefile("Sound on.gif",width-80,10,width-10,80);
+        readimagefile("Auto Rally.gif",width/2-100,height/2-50,width/2+150,height/2+25);
+        readimagefile("Emblem.gif",width/2-220,height/2-100,width/2-70,height/2+50);
+        stopmen1=1;
+    }
+}
+void howtoplay()
+{
+    if(pozitiemausx >= width/2+125 && pozitiemausx <= width/2+305 && pozitiemausy >= height/2+170 && pozitiemausy <= height/2+270)
+        readimagefile("How to play yellow.gif",width/2+125,height/2+170,width/2+305,height/2+270);
+    else
+        readimagefile("How to play.gif",width/2+125,height/2+170,width/2+305,height/2+270);
+    if(mx >= width/2+125 && mx <= width/2+305 && my >= height/2+170 && my <= height/2+270)
+    {
+        meniulhowtoplay=true;
+        meniulprincipal=false;
+        meniulsecundar=false;
+    }
+}
+void level1()
+{
+    readimagefile("Back.gif",30,height-110,80,height-50);
+    sndPlaySound("game start.wav",SND_ASYNC);
+    cleardevice();
+    SetUp();
+    setfillstyle(SOLID_FILL,BLUE);
+    floodfill(width/2,height/2,WHITE);
+    settextstyle(1, HORIZ_DIR, 60);
+    arr[0]='/0';
+    setcolor(WHITE);
+    settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+    sprintf(arr,"Score:%d",score+ScoreLastNumePlayer);
+    outtextxy(width/2-105,70,arr);
+
+    ConturPista();
+    Startul();
+    while(!gameOver)
+    {
+        Draw();
+        Input();
+    }
+    int nr=3;
+    if(gameOvergreseala==1)
+        while(nr<=20)
+        {
+            readimagefile("game over.gif",width/2-150-nr*10-(nr-4)*10,height/2-300-nr*10,width/2+50+nr*10+(nr+4)*10,height/2+100+nr*10+(nr+4)*10);
+            nr=nr+7;
+            delete "game over.gif";
+        }
+
+    if(gameovercomplet==1)
+        while(nr<=20)
+        {
+            readimagefile("win.gif",width/2-220-nr*10,height/2-150-nr*10,width/2+180+nr*10,height/2+150+nr*10);
+            nr=nr+7;
+            delete "game over.gif";
+        }
+
+    while(1)
+    {
+        getmouseclick(WM_LBUTTONDOWN, mx, my);
+        if(mx >= 30 && mx <= 80 && my >= height-110 && my <= height-50)
+        {
+            meniulprincipal=false;
+            meniulsecundar=true;
+            meniulhowtoplay=false;
+            stopranking=1;
+            break;
+        }
+
+    }
+}
+void conturpistalevel2()
+{
+    setcolor(WHITE);
+    // readimagefile("finishline2.jpg", 1100, 830, 1150, 900);
+    line(400, 200, 900, 200); // line 1;
+    line(900, 200, 1050, 400); // line 2;
+    line(1050, 400, 1400, 400); // line 3;
+    line(1400, 400, 1550, 600); // line 4;
+    line(1550, 600, 1800, 600); // line 5;
+    line(1800, 600, 1800, 900); // line 6;
+    line (1800, 900, 600, 900); // line 7;
+    line(600, 900, 500, 700); // line 8;
+    line(500, 700, 500, 500); // line 9;
+    line (400, 200, 500, 500); // line 10;
+    //marginea interioara;
+    line(500, 270, 870, 270);   //line 1;
+    line(500, 270, 580, 500);   //line 2;
+    line(580, 500, 580, 700);   //line 3;
+    line(580, 700, 650, 830);   //line 4;
+    line(650, 830, 1725, 830);  //line 5;
+    line(1725, 830, 1725, 680); // line 6;
+    line(1500, 680, 1725, 680);  // line 7;
+    line(1340, 470, 1500, 680);  // line 8;
+    line(1020, 470, 1340, 470);  // line 9
+    line(870, 270, 1020, 470);  // line 10;
+
+    gameOver=false;
+    dir=Stop;
+    readimagefile("Back.jpg",30,height-110,80,height-50);
+    setfillstyle(SOLID_FILL,BLUE);
+    floodfill(0,0,WHITE);  //  coloring the exterior of the rally
+    setfillstyle(SOLID_FILL,BLUE);
+    floodfill(510,271,WHITE); // coloring the interior of the rally
+    setfillstyle(HATCH_FILL,GREEN);
+    floodfill(411,201,WHITE); //col
+    setcolor(RED);
+
+    line((Dx+Ax+1)/2-3,(Dy+Gy)/2+R-7,(Dx-R-r+Ax+1+R+r)/2-3,(Dy+Gy)/2+20);
+    line((Dx-R-r+Ax+1+R+r)/2-4,(Dy+Gy)/2+R-7,(Dx-R-r+Ax+1+R+r)/2-4,(Dy+Gy)/2+20);
+    setcolor(BLACK);
+    x=(Dx+Ax+1)/2-13;
+    y=(Dy+Gy)/2+R/2;
+    antx=x;
+    anty=y;
+    score=0;
+}
+void level2()
+{
+    cleardevice();
+    readimagefile("Back.gif",30,height-110,80,height-50);
+    sndPlaySound("game start.wav",SND_ASYNC);
+    conturpistalevel2();
+
+    arr[0]='/0';
+    setcolor(WHITE);
+    settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+    sprintf(arr,"Score:%d",score+ScoreLastNumePlayer);
+    outtextxy(width/2-105,70,arr);
+
+    while(!gameOver)
+    {
+        Draw();
+        Input();
+    }
+    int nr=3;
+    if(gameOvergreseala==1)
+        while(nr<=20)
+        {
+            readimagefile("game over.gif",width/2-150-nr*10-(nr-4)*10,height/2-300-nr*10,width/2+50+nr*10+(nr+4)*10,height/2+100+nr*10+(nr+4)*10);
+            nr=nr+7;
+            delete "game over.gif";
+        }
+
+    if(gameovercomplet==1)
+        while(nr<=20)
+        {
+            readimagefile("win.gif",width/2-220-nr*10,height/2-150-nr*10,width/2+180+nr*10,height/2+150+nr*10);
+            nr=nr+7;
+            delete "game over.gif";
+        }
+    while(1)
+    {
+        getmouseclick(WM_LBUTTONDOWN, mx, my);
+        if(mx >= 30 && mx <= 80 && my >= height-110 && my <= height-50)
+        {
+            meniulprincipal=false;
+            meniulsecundar=true;
+            meniulhowtoplay=false;
+            stopranking=1;
+            break;
+        }
+
+    }
+
+}
+void conturpistalevel3()
+{
+    setcolor(WHITE);
+    line(500, 500, 1200, 500); // line 1;
+    line(1200, 500, 1350, 650);//line 2;
+    line(1350, 650, 1600, 650);//line 3;
+    line(1600, 650, 1600, 800); // line 4;
+    line(1600, 800, 1300, 900); // line 5;
+    line (1300, 900, 850, 900); // line 6;
+    line(850, 900, 700, 800); // line 7;
+    line (700, 800, 500, 800); // line 8;
+    line(500, 800, 350, 900); // line 9
+    line(350, 900, 200, 700); // line 10;
+    line(200, 700, 500, 500); //line 11;
+    line(830, 970, 1330, 970); // line 12;
+    line(1330, 970, 1700, 830); // line 13;
+    line (1700, 830, 1700, 580); // line 14;
+    line(1700, 580, 1580, 580); // line 15;
+    line(1580, 580, 1300, 200); // line 16;
+    line(1480, 580, 1380, 580); // line 17;
+    line(1380, 580, 1210, 410); // line18;
+    line(1210, 410, 500, 410); // line 19;
+    line(500, 410, 150, 630); // line 20;
+    line(150, 630, 150, 280); // line 21;
+    line(150, 280, 1250, 280); // line 22;
+    line(1250, 280, 1480, 580); // line 23;
+    line(1300, 200, 80, 200); // line 24;
+    line(80, 200, 80, 700); //line 25;
+    line(300, 1020, 80, 700); // line 26;
+    line(300, 1020, 500, 880); // line 27;
+    line(500, 880, 680, 880); // line 28;
+    line(680, 880, 830, 970); // line 29;
+
+    gameOver=false;
+    dir=Stop;
+    readimagefile("Back.jpg",30,height-110,80,height-50);
+    setfillstyle(SOLID_FILL,BLUE);
+    floodfill(0,0,WHITE);
+    setfillstyle(SOLID_FILL,BLUE);
+    floodfill(501,409,WHITE);
+    setfillstyle(SOLID_FILL,BLUE);
+    floodfill(1599, 799,WHITE);
+    setfillstyle(HATCH_FILL,GREEN);
+    floodfill(1601,800,WHITE);
+    setcolor(RED);
+
+    line((Dx+Ax+1)/2-3,(Dy+Gy)/2+R-7,(Dx-R-r+Ax+1+R+r)/2-3,(Dy+Gy)/2+20);
+    line((Dx-R-r+Ax+1+R+r)/2-4,(Dy+Gy)/2+R-7,(Dx-R-r+Ax+1+R+r)/2-4,(Dy+Gy)/2+20);
+    setcolor(BLACK);
+    x=(Dx+Ax+1)/2-13;
+    y=(Dy+Gy)/2+R/2;
+    antx=x;
+    anty=y;
+    score=0;
+}
+
+void level3()
+{
+    cleardevice();
+    readimagefile("Back.gif",30,height-110,80,height-50);
+    sndPlaySound("game start.wav",SND_ASYNC);
+    conturpistalevel3();
+
+    arr[0]='/0';
+    setcolor(WHITE);
+    settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+    sprintf(arr,"Score:%d",score+ScoreLastNumePlayer);
+    outtextxy(width/2-105,70,arr);
+
+    while(!gameOver)
+    {
+        Draw();
+        Input();
+    }
+    int nr=3;
+    if(gameOvergreseala==1)
+        while(nr<=20)
+        {
+            readimagefile("game over.gif",width/2-150-nr*10-(nr-4)*10,height/2-300-nr*10,width/2+50+nr*10+(nr+4)*10,height/2+100+nr*10+(nr+4)*10);
+            nr=nr+7;
+            delete "game over.gif";
+        }
+
+    if(gameovercomplet==1)
+        while(nr<=20)
+        {
+            readimagefile("win.gif",width/2-220-nr*10,height/2-150-nr*10,width/2+180+nr*10,height/2+150+nr*10);
+            nr=nr+7;
+            delete "game over.gif";
+        }
+    while(1)
+    {
+        getmouseclick(WM_LBUTTONDOWN, mx, my);
+        if(mx >= 30 && mx <= 80 && my >= height-110 && my <= height-50)
+        {
+            meniulprincipal=false;
+            meniulsecundar=true;
+            meniulhowtoplay=false;
+            stopranking=1;
+            break;
+        }
+
+    }
+
+}
+void conturpistalevel4()
+{
+    setcolor(WHITE);
+    line(700, 70, 1000, 70); // line 1;
+    line(700, 900, 1000, 900); // line 2;
+    line(700, 70, 650, 130); // line 3;
+    line(650, 840, 700, 900); // line 4;
+    line(1000, 70, 1060, 130); // line 5;
+    line(1000, 900, 1050,840); // line 6;
+    line(650, 130, 650, 350); // line 7;
+    line(1060, 130, 1060, 350); // line 8;
+    line(650, 840, 650, 650); // line 9;
+    line(1050, 840, 1050, 650); // line 10;
+    line(650, 350, 550, 300); // line 11;
+    line(1060, 350, 1170, 300); // line 12;
+    line(650, 650, 550, 700); // line 13;
+    line(1050, 650, 1170, 700); // line 14;
+    line(550, 300, 280, 300); // line 15;
+    line(1170, 300, 1440, 300); // line 16;
+    line(550, 700, 280, 700); // line 17;
+    line(1170, 700, 1440, 700); // line 18;
+    line(280, 300, 170, 400); //line 19;
+    line(1440, 300, 1570, 400); // line 20;
+    line(280, 700, 170, 600); // line 21;
+    line(1440, 700, 1570, 600); // line 22;
+    line(170, 400, 170, 600); // line 23;
+    line(1570, 400, 1570, 600); // line 24;
+    // circuit interior;
+    line(750, 150, 950, 150); // line 25;
+    line(750, 820, 950, 820); // line 26;
+    line(750, 150, 720, 190); // line 27;
+    line(950, 150, 980, 190); //line 28;
+    line(750, 820, 720, 780); // line 29;
+    line(950, 820, 980, 780); // line 30;
+    line(720, 190, 720, 380); // line 31;
+    line(980, 190, 980, 380); // line 32;
+    line(720, 780, 720, 630); // line 33;
+    line(980, 780, 980, 630); // line 34;
+    line(720, 380, 690, 400); // line 35;
+    line(980, 380, 1020, 400); // line 36;
+    line(720, 630, 690, 610); // line 37;
+    line(980, 630, 1020, 610); // line 38;
+    line(690, 400, 640, 400); // line 39;
+    line(1020, 400, 1070, 400); // line 40;
+    line(690, 610, 640, 610); // line 41;
+    line(1020, 610, 1060, 610); // line 42;
+    line(640, 400, 540, 350); // line 43;
+    line(1070, 400, 1180, 350); // line 44;
+    line(640, 610, 540, 660); // line 45;
+    line(1060, 610, 1180, 660); // line 46;
+    line(540, 350, 330, 350); // line 47;
+    line(1180, 350, 1390, 350); // line 48;
+    line(540, 660, 330, 660); // line 49;
+    line(1180, 660, 1390, 660); // line 50;
+    line(330, 350, 245, 430); // line 51;
+    line(1390, 350,  1500, 430); // line 52;
+    line(330, 660, 245, 580); // line 53;
+    line(1390, 660, 1500, 580); // line 54;
+    line(245, 430, 245, 580); // line 55;
+    line(1500, 430, 1500, 580); // line 56;
+
+    gameOver=false;
+    dir=Stop;
+    readimagefile("Back.jpg",30,height-110,80,height-50);
+    setfillstyle(SOLID_FILL,BLUE);
+    floodfill(0,0,WHITE);
+    setfillstyle(SOLID_FILL,BLUE);
+    floodfill(691,609,WHITE);
+    setfillstyle(HATCH_FILL,GREEN);
+    floodfill(691,612,WHITE);
+    setcolor(RED);
+
+    line((Dx-R-r+Ax+1+R+r)/2-3,(Dy+Gy)/2+R-7,(Dx-R-r+Ax+1+R+r)/2-3,(Dy+Gy)/2+10);
+    line((Dx-R-r+Ax+1+R+r)/2-4,(Dy+Gy)/2+R-7,(Dx-R-r+Ax+1+R+r)/2-4,(Dy+Gy)/2+10);
+    setcolor(BLACK);
+    x=(Dx+Ax+1)/2-13;
+    y=(Dy+Gy)/2+R/2;
+    antx=x;
+    anty=y;
+    score=0;
+}
+
+void level4()
+{
+    cleardevice();
+    readimagefile("Back.gif",30,height-110,80,height-50);
+    sndPlaySound("game start.wav",SND_ASYNC);
+    conturpistalevel4();
+
+    arr[0]='/0';
+    setcolor(WHITE);
+    settextstyle(DEFAULT_FONT,HORIZ_DIR,3);
+    sprintf(arr,"Score:%d",score+ScoreLastNumePlayer);
+    outtextxy(width/2-105,70,arr);
+
+    while(!gameOver)
+    {
+        Draw();
+        Input();
+    }
+    int nr=3;
+    if(gameOvergreseala==1)
+        while(nr<=20)
+        {
+            readimagefile("game over.gif",width/2-150-nr*10-(nr-4)*10,height/2-300-nr*10,width/2+50+nr*10+(nr+4)*10,height/2+100+nr*10+(nr+4)*10);
+            nr=nr+7;
+            delete "game over.gif";
+        }
+
+    if(gameovercomplet==1)
+        while(nr<=20)
+        {
+            readimagefile("win.gif",width/2-220-nr*10,height/2-150-nr*10,width/2+180+nr*10,height/2+150+nr*10);
+            nr=nr+7;
+            delete "game over.gif";
+        }
+    while(1)
+    {
+        getmouseclick(WM_LBUTTONDOWN, mx, my);
+        if(mx >= 30 && mx <= 80 && my >= height-110 && my <= height-50)
+        {
+            meniulprincipal=false;
+            meniulsecundar=true;
+            meniulhowtoplay=false;
+            stopranking=1;
+            break;
+        }
+
+    }
+
+}
+void car()
+{
+    stopmentesla=1;
+    stopmenlamburghini=1;
+    stopmencar=1;
+    while(ok)
+    {
+        getmouseclick(WM_LBUTTONDOWN, mx, my);
+        if(mx>=(width/2+width/2-width/4-57) && my>=150 && mx<=(width/2+width/2-width/4+157) && my<=250)
+        {
+            readimagefile("meniu yellow.gif",width/2+width/2-width/4-57,150,width/2+width/2-width/4+164,253);
+            readimagefile("tesla meniu.gif",width/2+width/2-width/4-57,157,width/2+width/2-width/4+160,257);
+
+            ok=0;
+        }
+        else if(stopmentesla)
+        {
+            stopmentesla=0;
+            readimagefile("meniu.gif",width/2+width/2-width/4-57,150,width/2+width/2-width/4+157,250);
+            readimagefile("tesla meniu.gif",width/2+width/2-width/4-57,157,width/2+width/2-width/4+160,257);
+        }
+
+        if(mx>=(width/2+width/2-width/4-57) && my>=268 && mx<=(width/2+width/2-width/4+157) && my<=378)
+        {
+            readimagefile("meniu yellow.gif",width/2+width/2-width/4-57,264,width/2+width/2-width/4+160,363);
+            readimagefile("Lamborghini meniu.gif",width/2+width/2-width/4-27,291,width/2+width/2-width/4+132,335);
+            ok=0;
+        }
+        else if(stopmenlamburghini)
+        {
+            stopmenlamburghini=0;
+            readimagefile("meniu.gif",width/2+width/2-width/4-57,266,width/2+width/2-width/4+157,360);
+            readimagefile("Lamborghini meniu.gif",width/2+width/2-width/4-27,291,width/2+width/2-width/4+132,335);
+        }
+
+        if(mx>=(width/2+width/2-width/4-52) && my>=386 && mx<=(width/2+width/2-width/4+157) && my<=486)
+        {
+            readimagefile("meniu yellow.gif",width/2+width/2-width/4-52,382,width/2+width/2-width/4+162,491);
+            readimagefile("Car meniu.gif",width/2+width/2-width/4-27,401,width/2+width/2-width/4+132,476);
+            ok=0;
+        }
+        else if(stopmencar)
+        {
+            stopmencar=0;
+            readimagefile("meniu.gif",width/2+width/2-width/4-52,384,width/2+width/2-width/4+160,488);
+            readimagefile("Car meniu.gif",width/2+width/2-width/4-27,401,width/2+width/2-width/4+132,476);
+        }
+        if(mx >= width/2+width/2-width/4-50 && my>=50 && mx<=width/2+width/2-width/4+150 && my <= 140 && stopbody==1)
+        {
+            stopbody=0;
+            readimagefile("Body.gif",width/2+width/2-width/4-50,48,width/2+width/2-width/4+148,142);
+            ok=0;
+        }
+    }
+}
+
+struct valoaretabel
+{
+    char player[100];
+    int points;
+    char time[100];
+};
+valoaretabel tabelvalori[6];
+void setuptabel()
+{
+    strcpy(tabelvalori[1].player,"MariaAreMere");
+    tabelvalori[1].points=9;
+    ord[1]=9;
+    strcpy(tabelvalori[1].time,"00:03:08");
+    strcpy(tabelvalori[4].player,"Stefan Salvatore");
+    tabelvalori[4].points=1000;
+    ord[4]=1000;
+    strcpy(tabelvalori[4].time,"77:07:00");
+    strcpy(tabelvalori[2].player,"George O'Malley");
+    tabelvalori[2].points=87;
+    ord[2]=87;
+    strcpy(tabelvalori[2].time,"65:10:12");
+    strcpy(tabelvalori[3].player,"Anonymus");
+    tabelvalori[3].points=32;
+    ord[3]=32;
+    strcpy(tabelvalori[3].time,"14:02:03");
+    strcpy(tabelvalori[5].player,"LapteGros");
+    tabelvalori[5].points=123;
+    ord[5]=123;
+    strcpy(tabelvalori[5].time,"00:00:00");
+}
+int lungimenumar(int x)
+{
+    int nr=0;
+    if(x==0)
+        return 1;
+    while(x)
+    {
+        x=x/10;
+        nr++;
+    }
+    return nr;
+}
+int nr=0;
+void Sort(int ord[])
+{
+    char auxc[1000];
+    int aux,i,j;
+    nr++;
+    for(i=1; i<=4; i++)
+    {
+     for(int k=1;k<=5;k++)
+        cout<<ord[k]<<" ";
+        cout<<endl;
+        for(j=i+1; j<=5; j++)
+            if(ord[i]<ord[j])
+            {
+
+                aux = ord[i];
+                ord[i] = ord[j];
+                ord[j] = aux;
+                aux=tabelvalori[i].points;
+                tabelvalori[i].points=tabelvalori[j].points;
+                tabelvalori[j].points=aux;
+
+                strcpy(auxc,tabelvalori[i].player);
+                strcpy(tabelvalori[i].player,tabelvalori[j].player);
+                strcpy(tabelvalori[j].player,auxc);
+
+                strcpy(auxc,tabelvalori[i].time);
+                strcpy(tabelvalori[i].time,tabelvalori[j].time);
+                strcpy(tabelvalori[j].time,auxc);
+
+            }
+
+    }
+
+}
+void tabel()
+{
+    char arr[100];
+    Sort(ord);
+    setcolor(WHITE);
+    for(int i=1; i<=5; i++)
+        if(i<=3 && tabelvalori[i].points!=-1)
+        {
+            settextstyle(3,0,3);
+            outtextxy(width/4+width/8+70,260+(i-1)*95,tabelvalori[i].player); //nume player
+
+            settextstyle(TRIPLEX_FONT,HORIZ_DIR,2);
+            sprintf(arr,"%d",tabelvalori[i].points);  //scor
+            outtextxy(width/4+width/8+260+(lungimenumar(tabelvalori[1].points)-lungimenumar(tabelvalori[i].points))*10,263+(i-1)*95,arr);
+
+            settextstyle(TRIPLEX_FONT,HORIZ_DIR,1);
+            outtextxy(width/4+width/8+370,263+(i-1)*95,tabelvalori[i].time);  //timp
+        }
+        else if(tabelvalori[i].points!=-1)
+        {
+            settextstyle(3,0,3);
+            outtextxy(width/4+width/8+50,468+(i-3)*75,tabelvalori[i].player);
+
+
+            settextstyle(TRIPLEX_FONT,HORIZ_DIR,2);
+            sprintf(arr,"%d",tabelvalori[i].points);
+            outtextxy(width/4+width/8+258+(lungimenumar(tabelvalori[1].points)-lungimenumar(tabelvalori[i].points))*10,473+(i-3)*75,arr);
+
+            settextstyle(TRIPLEX_FONT,HORIZ_DIR,1);
+            outtextxy(width/4+width/8+368,473+(i-3)*75,tabelvalori[i].time);
+        }
+}
+
+void CautareLastNamePlayerandaddscore()
+{
+    for(int i=1; i<=5; i++)
+        if(tabelvalori[i].points!=-1 && strcmp(tabelvalori[i].player,LastNumePLayer)==0)
+        {
+            tabelvalori[i].points=ScoreLastNumePlayer;
+            ord[i]=ScoreLastNumePlayer;
+        }
+}
+
+void MeniulSecundar()
+{
+    while(meniulsecundar)
+    {
+        readimagefile("meniu3.gif",0,0,width,height);
+        readimagefile("levels.gif",width/4-140,50,width/4+20,145);
+        readimagefile("Ranking.gif",width/2-95,50,width/2+85,145);
+        readimagefile("Body.gif",width/2+width/2-width/4-50,48,width/2+width/2-width/4+148,142);
+        ok=0;
+        readimagefile("Back.gif",30,height-110,80,height-50);
+        while(meniulsecundar)
+        {
+            getmouseclick(WM_LBUTTONDOWN, mx, my);
+            if(mx >= width/2+width/2-width/4-50 && my>=50 && mx<=width/2+width/2-width/4+150 && my <= 140 && stopbody==1)
+            {
+                stopbody=0;
+                readimagefile("Body.gif",width/2+width/2-width/4-50,48,width/2+width/2-width/4+148,142);
+                ok=0;
+
+            }
+            else if(mx >= width/2+width/2-width/4-50 && my>=50 && mx<=width/2+width/2-width/4+150 && my <= 140 && stopbody==0)
+            {
+                stopbody=1;
+                readimagefile("Body yellow.gif",width/2+width/2-width/4-32,50,width/2+width/2-width/4+132,140);
+                ok=1;
+            }
+            if(ok==1)
+            {
+                car();
+            }
+            if(mx >= width/2-95 && mx <=width/2+85 && my >= 50 && my <= 145 && stopranking==1)
+            {
+                stopranking=0;
+                readimagefile("Ranking.gif",width/2-95,50,width/2+85,145);
+            }
+            else if(mx >= width/2-95 && mx <=width/2+85 && my >= 50 && my <= 145 && stopranking==0)
+            {
+                stopranking=1;
+                readimagefile("Ranking yellow.gif",width/2-95,48,width/2+87,150);
+                readimagefile("table ranking.gif",width/4+width/8,175,width/2+width/8,height/2+height/8);
+
+                CautareLastNamePlayerandaddscore();
+                tabel();
+            }
+            if(mx >= width/4-140 && mx <=width/4+20 && my >= 50 && my <= 145 && stoplevels==0)
+            {
+                readimagefile("Levels yellow.gif",width/4-140,48,width/4+22,149);
+                readimagefile("Level1.gif",width/4-260,160,width/4-200,220);
+                Level1=1;
+                readimagefile("Level2.gif",width/4-180,158,width/4-117,222);
+                readimagefile("level3.gif",width/4-100,165,width/4-30,227);
+                readimagefile("backgroundblack.gif",width/4-2,167,width/4+53,215);
+                readimagefile("level4.gif",width/4-12,160,width/4+60,220);
+                readimagefile("level5.gif",width/4+80,160,width/4+150,220);
+                readimagefile("level6.gif",width/4-260,260,width/4-200,320);
+                readimagefile("level7.gif",width/4-180,260,width/4-117,320);
+                readimagefile("level8.gif",width/4-97,250,width/4-33,320);
+                readimagefile("level9.gif",width/4-12,260,width/4+60,320);
+                readimagefile("level10.gif",width/4+80,260,width/4+150,314);
+                stoplevels=1;
+            }
+            else if(mx >= width/4-180 && mx <=width/4 && my >= 50 && my <= 145 && stoplevels==1)
+            {
+                readimagefile("levels.gif",width/4-140,50,width/4+20,145);
+                stoplevels=0;
+
+            }
+            if(mx >= 30 && mx <= 80 && my >= height-110 && my <= height-50)
+            {
+                meniulprincipal=true;
+                meniulsecundar=false;
+                meniulhowtoplay=false;
+                stopmen1=0;
+            }
+            else if(mx>=width/4-260 && mx <=width/4-200  && my>=160 && my<=220 && Level1==1)
+            {
+                stoplevels=false;
+                stopranking=false;
+                level1();
+                ScoreLastNumePlayer=ScoreLastNumePlayer+score;
+                break;
+            }
+            else if(mx>=width/4-180 && my>=158 && mx<=width/4-117 && my<=222)
+            {
+                stoplevels=false;
+                stopranking=false;
+                level2();
+                ScoreLastNumePlayer=ScoreLastNumePlayer+score;
+                break;
+            }
+            else if(mx>=width/4-100 && my>=165 && mx<=width/4-30 && my<=227)
+            {
+                stoplevels=false;
+                stopranking=false;
+                level3();
+                ScoreLastNumePlayer=ScoreLastNumePlayer+score;
+                break;
+            }
+            else if(mx>=width/4-12 && my>=160 && mx<=width/4+600 && my<=220)
+            {
+                stoplevels=false;
+                stopranking=false;
+                level4();
+                ScoreLastNumePlayer=ScoreLastNumePlayer+score;
+                break;
+            }
+
+        }
+    }
+}
+void play()
+{
+    if(pozitiemausx>=width/2-120 && pozitiemausx<=width/2+100 && pozitiemausy>=height/2+85 && pozitiemausy<=height/2+190)
+    {
+        readimagefile("Play2.gif",width/2-120,height/2+85,width/2+120,height/2+200);
+        if(mx >= width/2-120 && mx <=width/2+100 && my >= height/2+85 && my <= height/2+200)
+        {
+            meniulsecundar=true;
+            meniulprincipal=false;
+            meniulhowtoplay=false;
+        }
+    }
+    else
+        readimagefile("Play1.gif",width/2-120,height/2+85,width/2+120,height/2+190);
+}
+void MeniulPrincipal()
+{
+    while(meniulprincipal)
+    {
+        DeseneazaMeniulPrincipal();
+        sunet();
+        exit();
+        howtoplay();
+        play();
+    }
+}
+int main()
+{
+    setuptabel();
+
+    cout<<"Name Playe 1: ";
+    cin.getline(tabelvalori[5].player,100);
+    strcpy(LastNumePLayer,tabelvalori[5].player); //o copie a ultimului nume introdus
+    ScoreLastNumePlayer=0;
+    tabelvalori[5].points=0;
+    ord[5]=0;
+
+    initwindow(width,height,"Raliu Auto");
+    setcolor(BLACK);
+    readimagefile("loading.gif",width/2-250,height/2-250,width/2+250,height/2+250);
+    for(int i=0; i<=500; i++)
+    {
+        line(width/2-250,height/2-250+i,width/2+250,height/2-250+i);
+        if(i%10>5)
+            Sleep(10);
+        else
+            Sleep(0);
+    }
+
+    // sndPlaySound("ROCK IT.wav",SND_ASYNC);
+    stopmen1=0;
+    stopsunet=1;
+    stopmen3=1;
+
+    while(1)
+    {
+        MeniulPrincipal();
+        MeniulSecundar();
+        MeniulHowToPlay();
+    }
+
+
+
+    getch();
+    closegraph();
+    return 0;
+}

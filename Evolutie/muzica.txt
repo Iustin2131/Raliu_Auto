@@ -1,0 +1,13 @@
+#include <iostream>
+#include<fstream>
+#include <graphics.h>
+#include <MMsystem.h>
+using namespace std;
+
+int main()
+{
+    initwindow(1000,1000);
+    PlaySound(TEXT("01_CISMWnO.wav"),NULL,SND_SYNC);
+    getch();
+    return 0;
+}

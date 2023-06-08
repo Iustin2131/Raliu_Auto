@@ -1,0 +1,322 @@
+#include <iostream>
+#include <graphics.h>
+#include <conio.h>
+#include <cmath>
+#include <ctime>
+#include <MMsystem.h>
+  using namespace std;
+   int width=GetSystemMetrics(SM_CXSCREEN);
+  int height=GetSystemMetrics(SM_CYSCREEN);
+  bool gameOver;
+int x=100,y=100,antx,anty,viteza,score,car1=1;
+enum edirectie {Stop=0,stanga,dreapta,sus,jos,stangasus,stangajos,dreaptajos,dreaptasus};
+edirectie dir;
+int a[1000][1000]={0};
+bool input = false;
+   void SetUp()
+   {
+       gameOver=false;
+       dir=Stop;
+       x=475; antx=x;
+       y=675; anty=y;
+        score=0;
+   }
+   void ConturPista()
+   {
+       setcolor(0);
+      arc(152, 100, 90, 180,50);         arc(150, 99,90,180,49);
+      line(101,100,101,650);             line(102,100,102,650);
+      line(152,50,840,50);               line(152,51,840,51);
+      arc(841,100,0,90,50);              arc(841,100,0,90,51);
+      line(891,100,891,650);             line(892,100,892,650);
+      arc(841,650,270,0,50);             arc(841,650,270,0,51);
+      arc(152,650,180,270,50);           arc(152,650,180,270,49);
+      line(152,700,841,700);             line(151,699,841,699);
+
+      line(181,100,812,100);             line(181,101,812,101);
+      arc(181,120,90,180,20);            arc(181,120,90,180,19);
+      line(181,650,812,650);             line(181,649,812,649);
+      arc(181,630,180,270,20);           arc(181,630,180,270,19);
+      line(160,120,160,630);             line(159,120,159,630);      //(de revazut conturul interior la pista)
+      line(825,120,825,630);             line(824,120,824,630);
+      arc(810,115,350,80,16);            arc(810,115,350,80,15);
+      arc(807,635,280,10,17);            arc(807,635,280,10,16);
+      setcolor(15);
+  }
+  void Startul()
+   {   setcolor(4);
+       line(490,700,490,650);
+       line(491,700,491,650); setcolor(15);
+   }
+   void Draw()
+   {
+        for(int i=10;i<=1800;i++)
+           for(int j=10;j<=1700;j++)
+            if(i==x && j==y)
+             {
+                 readimagefile("stadion.jpg",0,0,width,height);
+                 if(car1==1)
+                     readimagefile("car1dirstanga.gif",x-20,y-20,x+20,y+20);
+                   else
+                 if(car1==2)
+                     readimagefile("car1dirdreapta.gif",x-20,y-20,x+20,y+20);
+                   else
+                 if(car1==0)
+                     readimagefile("car1dirinainte.gif",x-20,y-20,x+20,y+20);
+                   else
+                 if(car1==3)
+                     readimagefile("car1dirinapoi.gif",x-20,y-20,x+20,y+20);
+                   else
+                 if(car1==4)
+                     readimagefile("car1dirstangajos.gif",x-30,y-30,x+30,y+30);
+                   else
+                 if(car1==5)
+                     readimagefile("car1dirstangasus.gif",x-60,y-60,x+60,y+60);
+                   else
+                 if(car1==6)
+                     readimagefile("car1dirdreaptajos.gif",x-30,y-30,x+30,y+30);
+                   else
+                 if(car1==7)
+                     readimagefile("car1dirdreaptasus.gif",x-30,y-30,x+30,y+30);
+             }
+          setcolor(0);
+         int i,j;
+         j=675; i=475;
+            while(a[i][j]!=0)
+          {
+
+              if(a[i][j]==1)
+               if(a[i-1][j]==2)
+              {
+                  line(i,j,i-10,j);
+                  i-=10;
+              }
+              else
+              if(a[i+1][j]==2)
+              {
+                  line(i,j,i+10,j);
+                  i+=10;
+              }
+              else
+              if(a[i][j-1]==2)
+              {
+                  line(i,j,i,j-10);
+                  j-=10;
+              }
+              else
+              if(a[i][j+1]==2)
+              {
+                  line(i,j,i,j+10);
+                  j+=10;
+              }
+              else
+              if(a[i-1][j-1]==2)
+              {
+                  line(i,j,i-10,j-10);
+                  i-=10;
+                  j-=10;
+              }
+              else
+              if(a[i-1][j+1]==2)
+              {
+                  line(i,j,i-10,j+10);
+                  i-=10;
+                  j+=10;
+              }
+              else
+              if(a[i+1][j+1]==2)
+              {
+                  line(i,j,i+10,j+10);
+                  i+=10;
+                  j+=10;
+              }
+              else
+              if(a[i+1][j-1]==2)
+              {
+                  line(i,j,i+10,j-10);
+                  i+=10;
+                  j-10;
+              }
+
+          }
+
+       ConturPista();
+       Startul();
+   }
+   void Input()
+   {
+    if(_kbhit())
+    {
+        input = true;
+      switch (_getch())
+      {
+          case 'a':
+            dir=stanga;
+            break;
+          case 'd':
+            dir=dreapta;
+            break;
+          case 'w':
+             dir=sus;
+             break;
+          case 's':
+             dir=jos;
+             break;
+          case 'q':
+             dir=stangasus;
+             break;
+          case 'e':
+            dir=dreaptasus;
+            break;
+          case 'x':
+            dir=dreaptajos;
+            break;
+          case 'z':
+             dir=stangajos;
+             break;
+        case 't':
+             gameOver=true;
+             break;
+      }
+    }
+   }
+   void Logic()
+   {
+      switch (dir)
+      {
+          case stanga:
+            {
+                antx=x;
+                    a[x][y]=1;
+                    a[x-1][y]=2;
+                x-=10;
+                car1=1;
+
+                dir=Stop;
+                break;
+            }
+          case dreapta:
+            {
+                antx=x;
+                    a[x][y]=1;
+                    a[x+1][y]=2;
+                x+=10;
+                car1=2;
+
+                dir=Stop;
+                break;
+            }
+          case sus:
+              {
+                  anty=y;
+                  a[x][y]=1;
+                  a[x][y-1]=2;
+                  y-=10;
+                  car1=0;
+
+                  dir=Stop;
+                  break;
+              }
+          case jos:
+            {
+                anty=y;
+                a[x][y]=1;
+                a[x][y+1]=2;
+                y+=10;
+                car1=3;
+
+                dir=Stop;
+                break;
+            }
+          case stangajos:
+              {
+                  antx=x;
+                  anty=y;
+                  a[x][y]=1;
+                  a[x-1][y+1]=2;
+                  x-=10;
+                  y+=10;
+                  car1=4;
+
+                  dir=Stop;
+                  break;
+              }
+          case stangasus:
+              {
+                  antx=x;
+                  anty=y;
+                  a[x][y]=1;
+                  a[x-1][y-1]=2;
+                  x-=10;
+                  y-=10;
+                  car1=5;
+
+                  dir=Stop;
+                  break;
+              }
+          case dreaptajos:
+              {
+                  antx=x;
+                  anty=y;
+                  a[x][y]=1;
+                  a[x+1][y+1]=2;
+                  x+=10;
+                  y+=10;
+                  car1=6;
+
+                  dir=Stop;
+                  break;
+              }
+          case dreaptasus:
+              {
+                  antx=x;
+                  anty=y;
+                  a[x][y]=1;
+                  a[x+1][y-1]=2;
+                  x+=10;
+                  y-=10;
+                  car1=7;
+
+                  dir=Stop;
+                  break;
+              }
+            default:
+             break;
+
+      }
+   }
+
+  int main()
+{
+
+    int mx,my;
+
+    initwindow(width,height,"Raliu Auto");
+    readimagefile("car.jpg",0,0,width,height);
+
+   while(1)
+    {
+        getmouseclick(WM_LBUTTONDOWN, mx, my);
+        if((mx >= 808 && mx <= 960 && my >= 390 && my <= 452) || (mx>=698 && mx<=781  && my>=390 && my<=460))
+            PlaySound(0,0,0);
+        if((mx >= 809 && mx <= 959 && my >= 478 && my <= 537) || (mx>=698 && mx<=781  && my>=473 && my<=543))
+            sndPlaySound("ROCK IT.wav",SND_ASYNC);
+         if((mx >= 809 && mx <= 959 && my >= 567 && my <= 627) || (mx>=698 && mx<=781  && my>=559 && my<=628))
+            closegraph();
+        if((mx >= 698 && mx <=781 && my >= 303 && my <= 375) || (mx >=807 && mx <=960 && my >=306 && my <=367))
+            {
+               //  PlaySound(0,0,0); Daca vreau sa opresc muzica cand incepe jocul
+                cleardevice();
+                SetUp();
+                while(1)
+                {
+                  Draw();
+                  Input();
+                  Logic();
+                }
+            }
+    }
+    getch(); closegraph();
+    return 0;
+}
+

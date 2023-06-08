@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1669816591 source:c:\users\iustin\desktop\proiect ip\v2\main.cpp
+	<iostream>
+	<graphics.h>
+	<conio.h>
+	<cmath>
+	<ctime>
+

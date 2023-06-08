@@ -1,0 +1,429 @@
+#include <iostream>
+#include <graphics.h>
+#include <conio.h>
+#include <cmath>
+#include <ctime>
+#include <MMsystem.h>
+#include <winbgim.h>
+  using namespace std;
+   int width=GetSystemMetrics(SM_CXSCREEN);
+  int height=GetSystemMetrics(SM_CYSCREEN);
+  int mx,my,ok=1;
+  char arr[100];   int nanosec=0,milisec=0,sec=0,minute=0,h=0;
+  bool gameOver;
+int x=100,y=100,antx,anty,viteza,score,car1=1,v[10000]={0};
+enum edirectie {Stop=0,stanga,dreapta,sus,jos,stangasus,stangajos,dreaptajos,dreaptasus};
+edirectie dir;
+int a[1000][1000]={0},pozitiemausx,pozitiemausy;
+ int Ay=height*200/864,Ax=width*396/1536,Gx=Ax,Gy=height*650/864,R=width*75/1536;
+      int Bx=width*1025/1536,By=Ay-R,Cx=Bx+R,Cy=Ay,Dx=Cx,Dy=Gy,r=R/2,ax,ay;
+bool input = false;
+bool meniu2;
+char tasta;
+   void ConturPista()
+   {
+      setcolor(WHITE);
+
+      arc(Ax+2+R, Ay, 90, 180,R);          arc(Ax+2+R, Ay-2,90,180,R-1);
+      line(Ax+1,Ay,Ax+1,Gy);               line(Ax+2,Ay,Ax+2,Gy);
+      line(Ax+2+R,By,Bx,By);               line(Ax+2+R,By+1,Bx,By+1);
+      arc(Bx+1,By+R,0,90,R);               arc(Bx+1,By+R,0,90,R+1);
+      line(Cx,Cy,Dx,Dy);                   line(Cx+1,Cy,Dx+1,Dy);
+      arc(Dx-R,Dy,270,0,R);                arc(Dx-R,Dy,270,0,R+1);
+      arc(Gx+R,Gy,180,270,R);              arc(Gx+R,Gy,180,270,R-1);
+      line(Gx+R,Gy+R,Dx-R,Dy+R);           line(Gx+R,Gy+R,Dx-R,Dy+R-1);
+
+      line(Ax+1+R,Ay+r/2,Ax+1+R,Gy-r);     line(Ax+1+R,Ay+r/2,Ax+1+R,Gy+1-r);
+      arc(Ax+1+R+r,Ay+r/2,90,180,r);       arc(Ax+1+R+r,Ay+r/2,90,180,r-1);
+      line(Ax+1+R+r,Ay-r/2,Bx-r,Ay-r/2);   line(Ax+1+R+r,Ay-r/2,Bx-r,Ay-r/2-1);
+      arc(Bx-r,Ay+r/2,0,90,r);             arc(Bx-r,Ay+r/2,0,90,r-1);
+      line(Bx,Ay+r/2,Dx-R,Dy-r);           line(Bx-1,Ay+r/2,Dx-R-1,Dy-r);      //(de revazut conturul interior la pista)
+      line(Dx-R-r,Dy,Ax+1+R+r,Gy);         line(Dx-R-r,Dy-1,Ax+1+R+r,Gy-1);
+      arc(Dx-R-r,Dy-r,270,0,r);            arc(Dx-R-r,Dy-r,270,0,r-1);
+      arc(Ax+1+R+r,Gy-r,180,270,r);        arc(Ax+1+R+r,Gy-r,180,270,r-1);
+
+  }
+    void SetUp()
+   {
+       gameOver=false;
+       dir=Stop;
+       readimagefile("Back.jpg",30,height-110,80,height-50);
+       ConturPista();
+   //    setfillstyle(SOLID_FILL,BLUE); floodfill(0,0,WHITE);  //  coloring the exterior of the rally
+       setfillstyle(SOLID_FILL,BLUE); floodfill(width/2,height/2,WHITE); // coloring the interior of the rally
+       setfillstyle(HATCH_FILL,GREEN); floodfill(Ax+10,Ay,WHITE); //coloring the interior of the track with squares
+       setcolor(BLACK);
+       x=(Dx+Gx)/2-15; y=(Dy+Gy)/2+10;
+       antx=x; anty=y;
+        score=0;
+   }
+  void Startul()
+   {   setcolor(4);
+       line((Dx+Gx)/2-2,(Dy+Gy)/2-10,(Dx-R-r+Ax+1+R+r)/2-3,(Dy+Gy)/2);
+       line((Dx+Gx)/2-3,(Dy+Gy)/2-10,(Dx-R-r+Ax+1+R+r)/2-4,(Dy+Gy)/2);
+   }
+    struct nod
+  {
+      int x1,y1,x2,y2,nr;
+      nod *urm;
+  };
+  int fr=0,numar=0;
+  nod *p=NULL,*u=NULL,*q;
+   void Drum(int x1,int y1,int x2,int y2)
+    {
+        if(p==NULL)
+        {
+            p=new nod;
+            p->x1=x1;
+            p->y1=y1;
+            p->x2=x2;
+            p->y2=y2;
+            p->nr=++numar;
+            u=p;
+            u->urm=NULL;
+        }
+        else
+        {
+            q=new nod;
+            q->x1=x1;
+            q->y1=y1;
+            q->x2=x2;
+            q->y2=y2;
+            q->nr=++numar;
+            u->urm=q;
+            u=q;
+            u->urm=NULL;
+        }
+    }
+     void ConstruireDrumAnterior()
+    {
+        setcolor(RED);
+            q=p; int cx,cy,bx,by,ax,ay,dx,dy,ex,ey;
+          while(q!=NULL)
+           {
+               line(q->x1,q->y1,q->x2,q->y2);   //Dreapta(Drumul pe unde a trecut masina)
+
+                if(v[q->nr]==11) //Sagetile
+               {
+                   cx=q->x1;cy=q->y1,bx=q->x2,by=q->y2;
+                   line((bx+cx)/2,(by+cy)/2,(bx+cx)/2,(cy+by)/2+10);
+                   line((bx+cx)/2,(by+cy)/2,(bx+cx)/2-10,(cy+by)/2);
+                   line((bx+cx)/2+1,(by+cy)/2+1,(bx+cx)/2+1,(cy+by)/2+11);
+                   line((bx+cx)/2+1,(by+cy)/2+1,(bx+cx)/2-9,(cy+by)/2+1);
+               }
+               else
+                if(v[q->nr]==22)
+                {
+                    cx=q->x1;cy=q->y1,ax=q->x2,ay=q->y2;
+                  line((ax+cx)/2,(ay+cy)/2,(ax+cx)/2,(ay+cy)/2+10);
+                  line((ax+cx)/2,(ay+cy)/2,(ax+cx)/2+10,(ay+cy)/2);
+                  line((ax+cx)/2-1,(ay+cy)/2-1,(ax+cx)/2+1,(ay+cy)/2+9);
+                  line((ax+cx)/2-1,(ay+cy)/2-1,(ax+cx)/2+9,(ay+cy)/2+1);
+                }
+                else
+                if(v[q->nr]==32)
+                {
+                    cx=q->x1;cy=q->y1,dx=q->x2,dy=q->y2;
+                  line((dx+cx)/2,(dy+cy)/2,(dx+cx)/2+10,(dy+cy)/2);
+                  line((dx+cx)/2,(dy+cy)/2,(dx+cx)/2,(cy+dy)/2-10);
+                }
+                else
+                if(v[q->nr]==42)
+                {
+                    cx=q->x1;cy=q->y1,ex=q->x2,ey=q->y2;
+                  line((ex+cx)/2,(ey+cy)/2,(ex+cx)/2-10,(ey+cy)/2);
+                  line((ex+cx)/2,(ey+cy)/2,(ex+cx)/2,(cy+ey)/2-10);
+                }
+                 else
+                if(v[q->nr]==12)
+                {
+                    cx=q->x1;cy=q->y1,ex=q->x2,ey=q->y2;
+                  line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2-7,(cy+ey)/2+7);
+                  line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2+7,(cy+ey)/2+7);
+                }
+                else
+                if(v[q->nr]==33)
+                {
+                    cx=q->x1;cy=q->y1,ex=q->x2,ey=q->y2;
+                  line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2-7,(cy+ey)/2-7);
+                  line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2+7,(cy+ey)/2-7);
+                }
+                else
+                if(v[q->nr]==31)
+                {
+                    cx=q->x1;cy=q->y1,ex=q->x2,ey=q->y2;
+                  line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2+7,(cy+ey)/2-7);
+                  line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2+7,(cy+ey)/2+7);
+                }
+                else
+                if(v[q->nr]==10)
+                {
+                    cx=q->x1;cy=q->y1,ex=q->x2,ey=q->y2;
+                  line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2-7,(cy+ey)/2-7);
+                  line((cx+ex)/2,(cy+ey)/2,(cx+ex)/2-7,(cy+ey)/2+7);
+                }
+                q=q->urm;
+           }
+    }
+
+   void Draw()
+   {
+        for(int i=10;i<=1800;i++)
+           for(int j=10;j<=1700;j++)
+            if(i==x && j==y)
+             {
+                 if(getpixel(x,y)==BLUE)
+                    gameOver=true;
+                milisec++;
+                 if(milisec==60)
+                  {
+                  milisec=0;
+                  sec++;
+                  }
+                 if(sec==60)
+                  {
+                      sec=0;
+                      minute++;
+                  }
+                  if(minute==60)
+                  {
+                      minute=0;
+                      h++;
+                  }
+                  sprintf(arr,"%d:%d:%d",h,minute,sec);
+                  outtextxy(width/2-50,10,arr);
+
+                 if(car1==1)
+                     readimagefile("car1dirstanga.gif",x-10,y-10,x+10,y+10);
+                   else
+                 if(car1==2)
+                     readimagefile("car1dirdreapta.gif",x-10,y-10,x+10,y+10);
+                   else
+                 if(car1==0)
+                     readimagefile("car1dirinainte.gif",x-10,y-10,x+10,y+10);
+                   else
+                 if(car1==3)
+                     readimagefile("car1dirinapoi.gif",x-10,y-10,x+10,y+10);
+                   else
+                 if(car1==4)
+                     readimagefile("car1dirstangajos.gif",x-10,y-10,x+10,y+10);
+                   else
+                 if(car1==5)
+                     readimagefile("car1dirstangasus.gif",x-10,y-10,x+10,y+10);
+                   else
+                 if(car1==6)
+                     readimagefile("car1dirdreaptajos.gif",x-10,y-10,x+10,y+10);
+                   else
+                 if(car1==7)
+                     readimagefile("car1dirdreaptasus.gif",x-10,y-10,x+10,y+10);
+             }
+          setcolor(0);
+
+          ConstruireDrumAnterior();
+         ConturPista();
+       Startul();
+   }
+   void Input()
+   {
+        tasta=getch();
+         if('a'==tasta)
+            {
+                v[++fr]=31;
+                Drum(x,y,x-40,y);
+                x-=40;
+                car1=1;
+            }
+        else
+          if('d'==tasta)
+            {
+                v[++fr]=10;
+                Drum(x,y,x+40,y);
+                x+=40;
+                car1=2;
+            }
+       else
+          if('w'==tasta)
+        {
+             v[++fr]=12;
+                  Drum(x,y,x,y-40);
+                  y-=40;
+                  car1=0;
+       }
+       else
+          if('s'==tasta)
+             {
+                v[++fr]=33;
+                Drum(x,y,x,y+40);
+                y+=40;
+                car1=3;
+             }
+       else
+          if('q'==tasta)
+             {
+                 v[++fr]=22;
+                  Drum(x,y,x-40,y-40);
+                  x-=40;
+                  y-=40;
+                  car1=5;
+             }
+      else
+          if('e'==tasta)
+             {
+                   v[++fr]=11;
+                  Drum(x,y,x+40,y-40);
+                  x+=40;
+                  y-=40;
+                  car1=7;
+             }
+      else
+           if('x'==tasta)
+             {
+               v[++fr]=42;
+                  Drum(x,y,x+40,y+40);
+                  x+=40;
+                  y+=40;
+                  car1=6;
+             }
+      else
+            if('z'==tasta)
+             {
+               v[++fr]=32;
+                  Drum(x,y,x-40,y+40);
+                  x-=40;
+                  y+=40;
+                  car1=4;
+             }
+           milisec++;
+                 if(milisec==60)
+                  {
+                  milisec=0;
+                  sec++;
+                  }
+                 if(sec==60)
+                  {
+                      sec=0;
+                      minute++;
+                  }
+                  if(minute==60)
+                  {
+                      minute=0;
+                      h++;
+                  }
+                  sprintf(arr,"%d:%d:%d",h,minute,sec);
+                  outtextxy(width/2-50,10,arr);
+   }
+
+  void meniul2()
+  {
+      getmouseclick(WM_LBUTTONDOWN, mx, my);
+      cleardevice();
+
+                 while(meniu2)
+              {
+
+                 settextstyle(DEFAULT_FONT,HORIZ_DIR,2);
+                 outtextxy(25,240,"Press any key to view the moving car");
+                 readimagefile("Back.gif",30,height-110,80,height-50);
+                 if(mx >= 30 && mx <= 80 && my >= height-110 && my <= height-50)   // Nu este corect
+                       {
+                           meniu2=false;
+                       }
+              }
+  }
+
+   int main()
+  {
+
+         initwindow(width,height,"Raliu Auto");
+
+    readimagefile("Rocket League.gif",0,0,width,height);
+    readimagefile("Sound on.gif",width-80,10,width-10,80);
+    sndPlaySound("ROCK IT.wav",SND_ASYNC);
+    readimagefile("Auto Rally.gif",width/2-100,height/2-50,width/2+150,height/2+25);
+    readimagefile("Emblem.gif",width/2-220,height/2-100,width/2-70,height/2+50);
+    gameOver=false;
+       while(1)
+    {
+         getmouseclick(WM_LBUTTONDOWN, mx, my);
+        pozitiemausx=mousex();
+        pozitiemausy=mousey();
+          if(pozitiemausx <= width-10 && pozitiemausx >= width-80 && pozitiemausy >= 10 && pozitiemausy <= 80 && ok==0)
+                readimagefile("Sound off.gif",width-80,10,width-10,80);
+            else
+          if(pozitiemausx <= width-10 && pozitiemausx >= width-80 && pozitiemausy >= 10 && pozitiemausy <= 80 && ok==1)
+                 readimagefile("Sound on.gif",width-80,10,width-10,80);
+           if((mx >= width-80 && mx <=width-10 && my >= 10 && my <= 80) &&ok==1)
+                {
+                readimagefile("Sound off.gif",width-80,10,width-10,80);
+                PlaySound(0,0,0);
+                ok=0;
+                }
+            else
+                if((mx >= width-80 && mx <=width-10 && my >= 10 && my <= 80) &&ok==0)
+                {
+                    sndPlaySound("ROCK IT.wav",SND_ASYNC);
+                    readimagefile("Sound on.gif",width-80,10,width-10,0);
+                    ok=1;
+                }
+
+            if(pozitiemausx >= width/2-300 && pozitiemausx <= width/2-140 && pozitiemausy >= height/2+170 && pozitiemausy <= height/2+270)
+             readimagefile("Exit yellow.gif",width/2-300,height/2+170,width/2-140,height/2+277);
+             else
+             readimagefile("Exit.gif",width/2-300,height/2+170,width/2-140,height/2+275);
+             if(mx >=  width/2-300 && mx <= width/2-140 && my >=  height/2+170 && my <=  height/2+270)
+               {
+                    closegraph();
+                    PlaySound(0,0,0);
+               }
+
+            if(pozitiemausx >= width/2+125 && pozitiemausx <= width/2+305 && pozitiemausy >= height/2+170 && pozitiemausy <= height/2+270)
+              readimagefile("How to play yellow.gif",width/2+125,height/2+170,width/2+305,height/2+270);
+            else
+              readimagefile("How to play.gif",width/2+125,height/2+170,width/2+305,height/2+270);
+            if(mx >= width/2+125 && mx <= width/2+305 && my >= height/2+170 && my <= height/2+270)
+             {
+                 meniu2=true;
+                 meniul2();
+
+             }
+            if(pozitiemausx>=width/2-120 && pozitiemausx<=width/2+100 && pozitiemausy>=height/2+85 && pozitiemausy<=height/2+190)
+            {
+                 readimagefile("Play2.gif",width/2-120,height/2+85,width/2+120,height/2+200);
+                if(mx >= width/2-120 && mx <=width/2+100 && my >= height/2+85 && my <= height/2+200)
+            {
+                readimagefile("Back.jpg",30,height-110,80,height-50);
+                PlaySound(0,0,0); // Daca vreau sa opresc muzica cand incepe jocul
+                sndPlaySound("game start.wav",SND_ASYNC);
+                cleardevice();
+                SetUp();
+                settextstyle(1, HORIZ_DIR, 60);
+                while(!gameOver)
+                {
+                  Draw();
+                  Input();
+                }
+                getch();
+                closegraph();
+                while(1)
+                if(mx >= 30 && mx <= 80 && my >= height-110 && my <= height-50)
+                           break;
+            }
+           }
+           else
+              readimagefile("Play1.gif",width/2-120,height/2+85,width/2+120,height/2+190);
+       if(gameOver==true && mx >= 30 && mx <= 80 && my >= height-110 && my <= height-50)
+    {
+    cleardevice();
+    readimagefile("Rocket League.gif",0,0,width,height);
+    readimagefile("Sound on.gif",width-80,10,width-10,80);
+    sndPlaySound("ROCK IT.wav",SND_ASYNC);
+    readimagefile("Auto Rally.gif",width/2-100,height/2-50,width/2+150,height/2+25);
+    readimagefile("Emblem.gif",width/2-220,height/2-100,width/2-70,height/2+50);
+    gameOver=false;
+    }
+    }
+
+    getch(); closegraph();
+    return 0;
+}
+
